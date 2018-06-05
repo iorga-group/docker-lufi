@@ -1,4 +1,6 @@
-FROM xataz/alpine:3.7
+FROM alpine:3.7
+
+ARG LUFI_VERSION=0.02.2
 
 ENV GID=991 \
     UID=991 \
@@ -7,13 +9,9 @@ ENV GID=991 \
     MAX_FILE_SIZE=1000000000 \
     WEBROOT=/ \
     DEFAULT_DELAY=1 \
-    MAX_DELAY=0
-
-LABEL description="lufi based on alpine" \
-      tags="latest" \
-      maintainer="xataz <https://github.com/xataz>" \
-      build_ver="201806010431" \
-      commit="7efebff4bfa3722796a80a783fb332d6e50d41de"
+    MAX_DELAY=0 \
+    ALLOW_PWD_ON_FILES=0 \
+    POLICY_WHEN_FULL=warn
 
 RUN BUILD_DEPS="build-base \
                 libressl-dev \
@@ -38,6 +36,8 @@ RUN BUILD_DEPS="build-base \
     && cpan install Carton \
     && git clone https://git.framasoft.org/luc/lufi.git /usr/lufi \
     && cd /usr/lufi \
+# checkout a specific tag thanks to https://stackoverflow.com/a/792027/535203
+    && git checkout tags/${LUFI_VERSION} -b ${LUFI_VERSION} \
     && rm -rf cpanfile.snapshot \
     && carton install \
     && apk del --no-cache ${BUILD_DEPS} \
